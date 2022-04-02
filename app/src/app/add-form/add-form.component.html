@@ -4,7 +4,7 @@
         <button type="button" class="icon-button" (click)="close()"><span class="material-icons">clear</span></button>
     </div>
     <hr>
-    <form [formGroup]="form">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <label>
             Тип крана
             <select formControlName="craneType">
@@ -35,9 +35,9 @@
             <div *ngFor="let truck of getTrucksArray(1).controls; let idx = index">
                 <div [formGroupName]="idx" class="grid" (change)="onChange(1, idx)">
                     <input type="text" formControlName="truckName">
-                    <input type="text" formControlName="loaded">
+                    <input type="text" formControlName="loaded" >
                     <input type="text" formControlName="unloaded">
-                    <button type="button" *ngIf="isTouched[0][idx] && getTrucksArray(1).length > 1" (click)="removeTruck(1, idx)">
+                    <button type="button" *ngIf="this.getTrucksArray(1).controls[idx].touched && getTrucksArray(1).length > 1" (click)="removeTruck(1, idx)">
                         <span class="material-icons">delete</span>
                     </button>
                 </div>
@@ -50,7 +50,7 @@
                     <input type="text" formControlName="truckName">
                     <input type="text" formControlName="loaded">
                     <input type="text" formControlName="unloaded">
-                    <button type="button" *ngIf="isTouched[1][idx] && getTrucksArray(2).length > 1" (click)="removeTruck(2, idx)">
+                    <button type="button" *ngIf="this.getTrucksArray(2).controls[idx].touched && getTrucksArray(2).length > 1" (click)="removeTruck(2, idx)">
                         <span class="material-icons">delete</span>
                     </button>
                 </div>
@@ -61,7 +61,7 @@
         <div class="total">Всего выгружено т</div>
 
         <button type="button" (click)="close()">Закрыть</button>
-        <button type="submit" class="accent-button" (click)="_addTruck(1)">Сохранить</button>
+        <button type="submit" class="accent-button">Сохранить</button>
     </form>
 </div>
 
