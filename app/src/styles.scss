@@ -1,1 +1,35 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+    --accent-background-color: #b4da3b;
+    --primary-background-color: #dfeeaf;
+    --default-background-color: white;
+   
+
+    --default-text-color: black;
+    --placeholdel-color: silver;
+    --table-heading-color: white;
+
+    --accent-button-color: blue;
+    --primary-button-color: gray;
+
+    --cover-color: rgba(0, 0, 0, .6)
+}
+
+body {
+    font-family: sans-serif;
+    color: var(--default-text-color);
+    background-color: var(--default-background-color);
+}
+button {
+    border-radius: 4px;
+    border: none;
+}
+
+.icon-button {
+    background-color: transparent;
+
+}
+.accent-button {
+    background-color: var(--accent-button-color);
+    padding: .5em 1em;
+    color: var(--default-background-color);
+}

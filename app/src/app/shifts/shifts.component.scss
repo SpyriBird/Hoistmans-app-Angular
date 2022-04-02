@@ -1,0 +1,56 @@
+
+@import '../../styles.scss';
+h1 {
+    text-align: center;
+}
+.heading {
+    display: grid;
+    grid-template-columns: 1fr 50px;;
+    border: 2px solid var(--default-text-color);
+}
+table {
+    margin-top: 20px;
+    border-collapse: collapse;
+    width: 100%;
+    box-shadow: 5px 5px var(--placeholdel-color);
+}
+th, td {
+    border: 1px solid var(--accent-background-color);
+}
+tr {
+
+    &:nth-of-type(odd) {
+        background-color: var(--primary-background-color);
+    }
+    &:first-of-type {
+        background-color: var(--accent-background-color);
+    }
+}
+th {
+    color: var(--table-heading-color);
+    text-align: left;
+}
+
+.cover {
+    z-index: 2;
+    background-color: var(--cover-color);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+}
+.modal-window {
+    background-color: var(--default-background-color);
+    position: absolute;
+    width: 800px;
+    top: 200px;
+    right: calc(50% - 400px);
+    z-index: 3;
+}
+button:enabled {
+    cursor: pointer;
+}
+button span {
+    cursor: inherit;
+}

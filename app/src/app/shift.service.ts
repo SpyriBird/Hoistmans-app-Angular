@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 
 export enum CraneType {
-  single = 'Одинарный',
-  double = 'Двойной'
+  Single = 'Одинарный',
+  Double = 'Двойной'
 }
 export interface Truck {
   name: string,
-  loaded: number,
-  unloaded: number
+  loaded?: number,
+  unloaded?: number
 }
 
 export interface Shift {
@@ -28,11 +28,11 @@ export interface Shift {
 export class ShiftService {
 
   private _shifts: Shift[] = [
-    {id: 1, craneType: CraneType.double, workerName: 'Иванов И.И.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
-    {id: 2, craneType: CraneType.double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
-    {id: 3, craneType: CraneType.double, workerName: 'Сидоров С.С.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
-    {id: 4, craneType: CraneType.double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
-    {id: 5, craneType: CraneType.double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
+    {id: 1, craneType: CraneType.Double, workerName: 'Иванов И.И.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
+    {id: 2, craneType: CraneType.Double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
+    {id: 3, craneType: CraneType.Double, workerName: 'Сидоров С.С.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
+    {id: 4, craneType: CraneType.Double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
+    {id: 5, craneType: CraneType.Single, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
   ]
 
   constructor() { 
@@ -46,8 +46,8 @@ export class ShiftService {
       let totalUnload = 0;
 
       for (let truck of shift.firstCrane) {
-        totalLoad += truck.loaded;
-        totalUnload += truck.unloaded;
+        totalLoad += truck.loaded ? truck.loaded : 0;
+        totalUnload += truck.unloaded ? truck.unloaded : 0;
       }
       
       this._shifts[index].totalLoad = totalLoad;
@@ -64,7 +64,7 @@ export class ShiftService {
   }
 
   public removeShift(id: number) {
-    this._shifts.filter( (item) => item.id !== id);
+    this._shifts = this._shifts.filter( (item) => item.id !== id);
   }
 
   public editShift(shift: Shift) {

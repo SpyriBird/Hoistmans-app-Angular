@@ -1,7 +1,7 @@
 <div class="container">
     <div class="heading">
         <h1>Список смен</h1> 
-        <button type="button">+</button>
+        <button type="button" (click)="addShift()" class="icon-button"><span class="material-icons">add</span></button>
     </div>
     <table>
         <tr>
@@ -17,13 +17,17 @@
             <td>{{shift.workerName}}</td>
             <td>{{shift.dateOfStart | date:'dd.MM.yy H:mm'}}</td>
             <td>{{shift.dateOfFinish | date:'dd.MM.yy H:mm'}}</td>
-            <td>{{shift.craneType}}</td>
-            <td>{{shift.totalLoad}}</td>
-            <td>{{shift.totalUnload}}</td>
+            <td>{{shift.craneType }}</td>
+            <td>{{shift.totalLoad ? shift.totalLoad + " т" : ''}}</td>
+            <td>{{shift.totalUnload ? shift.totalUnload + " т" : ''}}</td>
             <td>
-                <button type="button">edit</button>
-                <button type="button">delete</button>
+                <button type="button" class="icon-button"><span class="material-icons">edit</span></button>
+                <button type="button" class="icon-button" (click)="removeShift(shift.id)"><span class="material-icons">delete</span></button>
             </td>
         </tr>
     </table>
+</div>
+<div *ngIf="adding">
+    <div class="cover" (click)="closeModalWindow()"></div>
+    <app-add-form (event)="handleEvent($event)" class="modal-window"></app-add-form>
 </div>

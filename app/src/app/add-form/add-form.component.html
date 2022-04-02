@@ -1,0 +1,52 @@
+<div class="container">
+    <div class="heading">
+        <h3>Добавление смены</h3>
+        <button type="button" class="icon-button" (click)="close()"><span class="material-icons">clear</span></button>
+    </div>
+    <hr>
+    <form [formGroup]="form">
+        <label>
+            Тип крана
+            <select formControlName="craneType">
+                <option value="" disabled selected hidden>Выберите тип крана...</option>
+                <option value="{{craneTypes.Single}}">{{craneTypes.Single}}</option>
+                <option value="{{craneTypes.Double}}">{{craneTypes.Double}}</option>
+            </select>
+        </label>
+        <label>
+            ФИО ответственного
+            <input type="text" placeholder="Иванов И.И." formControlName="workerName">
+        </label>
+        <div class="date-inputs">
+            <label>
+                Дата начала 
+            </label>
+            <label>
+                Дата окончания
+            </label>
+        </div>
+        <div formArrayName="trucks1" class="crane-inputs">
+            <div class="subheading">Первый кран</div>
+            <div>
+                <div>Грузовик</div>
+                <div>Погружено, т</div>
+                <div>Выгружено, т</div>
+                <div *ngFor="let truck of getTrucksArray(1).controls; let idx = index">
+                    <div [formGroupName]="idx" class="grid" (change)="onChange(1, idx)">
+                        <input type="text" formControlName="truckName">
+                        <input type="text" formControlName="loaded">
+                        <input type="text" formControlName="unloaded">
+                        <button type="button" *ngIf="isTouched[idx] && getTrucksArray(1).length > 1" (click)="removeTruck(1, idx)"><span class="material-icons">delete</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="total">Всего погружено т</div>
+        <div class="total">Всего выгружено т</div>
+
+        <button type="button" (click)="close()">Закрыть</button>
+        <button type="submit" class="accent-button" (click)="_addTruck(1)">Сохранить</button>
+    </form>
+</div>
+
