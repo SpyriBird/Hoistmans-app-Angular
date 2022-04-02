@@ -25,19 +25,34 @@
                 Дата окончания
             </label>
         </div>
-        <div formArrayName="trucks1" class="crane-inputs">
+        <div formArrayName="trucks1">
             <div class="subheading">Первый кран</div>
-            <div>
+            <div class="grid">
                 <div>Грузовик</div>
                 <div>Погружено, т</div>
                 <div>Выгружено, т</div>
-                <div *ngFor="let truck of getTrucksArray(1).controls; let idx = index">
-                    <div [formGroupName]="idx" class="grid" (change)="onChange(1, idx)">
-                        <input type="text" formControlName="truckName">
-                        <input type="text" formControlName="loaded">
-                        <input type="text" formControlName="unloaded">
-                        <button type="button" *ngIf="isTouched[idx] && getTrucksArray(1).length > 1" (click)="removeTruck(1, idx)"><span class="material-icons">delete</span></button>
-                    </div>
+            </div>
+            <div *ngFor="let truck of getTrucksArray(1).controls; let idx = index">
+                <div [formGroupName]="idx" class="grid" (change)="onChange(1, idx)">
+                    <input type="text" formControlName="truckName">
+                    <input type="text" formControlName="loaded">
+                    <input type="text" formControlName="unloaded">
+                    <button type="button" *ngIf="isTouched[0][idx] && getTrucksArray(1).length > 1" (click)="removeTruck(1, idx)">
+                        <span class="material-icons">delete</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div formArrayName="trucks2" *ngIf="form.value.craneType === craneTypes.Double">
+            <div class="subheading">Второй кран</div>
+            <div *ngFor="let truck of getTrucksArray(2).controls; let idx = index">
+                <div [formGroupName]="idx" class="grid" (change)="onChange(2, idx)">
+                    <input type="text" formControlName="truckName">
+                    <input type="text" formControlName="loaded">
+                    <input type="text" formControlName="unloaded">
+                    <button type="button" *ngIf="isTouched[1][idx] && getTrucksArray(2).length > 1" (click)="removeTruck(2, idx)">
+                        <span class="material-icons">delete</span>
+                    </button>
                 </div>
             </div>
         </div>

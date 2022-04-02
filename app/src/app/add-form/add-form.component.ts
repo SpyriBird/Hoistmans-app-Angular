@@ -11,7 +11,7 @@ import { CraneType } from '../shift.service';
 export class AddFormComponent implements OnInit {
 
   @Output() event: EventEmitter<any> = new EventEmitter;
-  public isTouched: boolean[] = [false];
+  public isTouched: boolean[][] = [[false], [false]];
   public form: FormGroup = new FormGroup({});
   public craneTypes = CraneType;
 
@@ -38,7 +38,7 @@ export class AddFormComponent implements OnInit {
   public _addTruck(crane: number) {
     let trucks = this.getTrucksArray(crane)
     trucks.push(this._getTruckForm());
-    this.isTouched.push(false)
+    this.isTouched[crane - 1].push(false)
   }
 
   private _getTruckForm(): FormGroup {
@@ -54,13 +54,15 @@ export class AddFormComponent implements OnInit {
   }
 
   public onChange(crane: number, index: number) {
-
+    
     setTimeout(() => {
-        this.isTouched[index] = (<FormArray>this.getTrucksArray(crane).controls[index]).touched;
+        this.isTouched[crane - 1][index] = (<FormArray>this.getTrucksArray(crane).controls[index]).touched;
 
-        if (this.isTouched[this.isTouched.length - 1]) {
+        if (this.isTouched[crane - 1][this.isTouched[crane - 1].length - 1]) {
           this._addTruck(crane);
         }
+
+        console.log(this.isTouched[crane - 1][index], 'change', crane, index)
     });
   }
 
