@@ -1,1 +1,29 @@
-<p>shifts works!</p>
+<div class="container">
+    <div class="heading">
+        <h1>Список смен</h1> 
+        <button type="button">+</button>
+    </div>
+    <table>
+        <tr>
+            <th>ФИО</th>
+            <th>Начало</th>
+            <th>Окончание</th>
+            <th>Тип крана</th>
+            <th>Погружено тонн</th>
+            <th>Выгружено тонн</th>
+            <th>actions</th>
+        </tr>
+        <tr *ngFor="let shift of shifts">
+            <td>{{shift.workerName}}</td>
+            <td>{{shift.dateOfStart | date:'dd.MM.yy H:mm'}}</td>
+            <td>{{shift.dateOfFinish | date:'dd.MM.yy H:mm'}}</td>
+            <td>{{shift.craneType}}</td>
+            <td>{{shift.totalLoad}}</td>
+            <td>{{shift.totalUnload}}</td>
+            <td>
+                <button type="button">edit</button>
+                <button type="button">delete</button>
+            </td>
+        </tr>
+    </table>
+</div>
