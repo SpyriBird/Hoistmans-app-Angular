@@ -17,16 +17,18 @@
             ФИО ответственного
             <input type="text" placeholder="Иванов И.И." formControlName="workerName">
         </label>
-        <div class="date-inputs">
+        <mat-form-field class="date-inputs">
             <label>
                 Дата начала 
-                <input type="date" formControlName="dateOfStart">
+                <input matInput [matDatepicker]="dp" formControlName="dateOfStart">
+                <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
+                <mat-datepicker #dp></mat-datepicker>
             </label>
             <label>
                 Дата окончания
                 <input type="date" formControlName="dateOfFinish">
             </label>
-        </div>
+        </mat-form-field>
         <div formArrayName="cranes">
             <div formArrayName="0">
                 <div *ngIf="form.value.craneType === craneTypes.Double" class="subheading">Первый кран</div>
@@ -58,8 +60,8 @@
                             <option value="" disabled selected hidden>Выберите машину...</option>
                             <option *ngFor="let truck of truckNames" value="{{truck}}">{{truck}}</option>
                         </select>
-                        <input type="number" formControlName="loaded" (input)="disable(2, idx, true)">
-                        <input type="number" formControlName="unloaded" (input)="disable(2, idx, false)">
+                        <input type="text" formControlName="loaded" (input)="disable(2, idx, true)">
+                        <input type="text" formControlName="unloaded" (input)="disable(2, idx, false)">
                         <button type="button" *ngIf="this.getTrucksArray(2).controls[idx].touched && getTrucksArray(2).length > 1" (click)="removeTruck(2, idx)">
                             <span class="material-icons">delete</span>
                         </button>

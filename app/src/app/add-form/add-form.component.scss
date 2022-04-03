@@ -28,9 +28,9 @@ select, input {
 .date-inputs {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    & input {
-        display: inline;
-    }
+    // & input {
+    //     display: inline;
+    // }
 }
 .button-container {
     display: flex;
