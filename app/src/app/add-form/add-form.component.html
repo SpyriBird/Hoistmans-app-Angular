@@ -26,7 +26,8 @@
             </label>
         </div>
         <div formArrayName="trucks1">
-            <div class="subheading">Первый кран</div>
+            <div *ngIf="form.value.craneType === craneTypes.Double" class="subheading">Первый кран</div>
+            <div *ngIf="form.value.craneType !== craneTypes.Double" class="subheading">Кран</div>
             <div class="grid">
                 <div>Грузовик</div>
                 <div>Погружено, т</div>
@@ -34,7 +35,9 @@
             </div>
             <div *ngFor="let truck of getTrucksArray(1).controls; let idx = index">
                 <div [formGroupName]="idx" class="grid" (change)="onChange(1, idx)">
-                    <input type="text" formControlName="truckName">
+                    <select formControlName="truckName">
+                        <option *ngFor="let truck of truckNames" value="{{truck}}">{{truck}}</option>
+                    </select>
                     <input type="text" formControlName="loaded" >
                     <input type="text" formControlName="unloaded">
                     <button type="button" *ngIf="this.getTrucksArray(1).controls[idx].touched && getTrucksArray(1).length > 1" (click)="removeTruck(1, idx)">

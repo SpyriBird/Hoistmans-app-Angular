@@ -4,6 +4,13 @@ export enum CraneType {
   Single = 'Одинарный',
   Double = 'Двойной'
 }
+export enum TruckName {
+  Truck1 = 'Грузовик 1',
+  Truck2 = 'Грузовик 2',
+  Truck3 = 'Грузовик 3',
+  Truck4 = 'Грузовик 4',
+}
+
 export interface Truck {
   name: string,
   loaded?: number,

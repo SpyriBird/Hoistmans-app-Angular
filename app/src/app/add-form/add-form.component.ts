@@ -1,7 +1,7 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 
-import { CraneType } from '../shift.service';
+import { CraneType, TruckName } from '../shift.service';
 
 @Component({
   selector: 'app-add-form',
@@ -14,6 +14,7 @@ export class AddFormComponent implements OnInit {
 
   public form: FormGroup = new FormGroup({});
   public craneTypes = CraneType;
+  public truckNames = Object.values(TruckName);
 
   constructor() { }
 
