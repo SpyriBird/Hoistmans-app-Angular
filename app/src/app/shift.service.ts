@@ -12,7 +12,7 @@ export enum TruckName {
 }
 
 export interface Truck {
-  name: string,
+  name: TruckName,
   loaded?: number,
   unloaded?: number
 }
@@ -37,11 +37,11 @@ export interface Shift {
 export class ShiftService {
 
   private _shifts: Shift[] = [
-    {id: 1, craneType: CraneType.Double, workerName: 'Иванов И.И.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: 'ygdsc', loaded: 10, unloaded: 0}] }, {trucks: [{name: 'dsfgv', loaded: 4, unloaded: 0}] }] },
-    {id: 2, craneType: CraneType.Double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: 'ygdsc', loaded: 10, unloaded: 0}] }]},
-    {id: 3, craneType: CraneType.Double, workerName: 'Сидоров С.С.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: 'ygdsc', loaded: 10, unloaded: 0}] }]},
-    {id: 4, craneType: CraneType.Double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: 'ygdsc', loaded: 10, unloaded: 0}] }]},
-    {id: 5, craneType: CraneType.Single, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: 'ygdsc', loaded: 10, unloaded: 0}] }]},
+    {id: 1, craneType: CraneType.Double, workerName: 'Иванов И.И.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: TruckName.Truck1, loaded: 10, unloaded: 0}] }, {trucks: [{name: TruckName.Truck2, loaded: 4, unloaded: 0}] }] },
+    {id: 2, craneType: CraneType.Double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: TruckName.Truck2, loaded: 10, unloaded: 0}] }, {trucks: [{name: TruckName.Truck2, loaded: 4, unloaded: 0}] }]},
+    {id: 3, craneType: CraneType.Double, workerName: 'Сидоров С.С.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: TruckName.Truck1, loaded: 10, unloaded: 0}] }, {trucks: [{name: TruckName.Truck2, loaded: 4, unloaded: 0}] }]},
+    {id: 4, craneType: CraneType.Single, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: TruckName.Truck4, loaded: 10, unloaded: 0}] }]},
+    {id: 5, craneType: CraneType.Single, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: TruckName.Truck1, loaded: 10, unloaded: 0}] }]},
   ]
 
   constructor() { 

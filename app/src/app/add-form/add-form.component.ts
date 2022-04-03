@@ -36,12 +36,13 @@ export class AddFormComponent implements OnInit {
       cranes: this.createCranesArray()
     });
     console.log(this.form)
-    console.log(this.getTrucksArray(1).controls);
+    console.log(this.getTrucksArray(1));
   }
 
   private createCranesArray() {
     if (!this.edit) {
       return new FormArray([
+        new FormArray([ this._getTruckForm() ]),
         new FormArray([ this._getTruckForm() ])
       ]);
     }
@@ -75,10 +76,9 @@ export class AddFormComponent implements OnInit {
   public getTrucksArray(crane: number): FormArray {
     return (<FormArray>this.form.get('cranes')).controls[crane - 1] as FormArray;
   }  
-  // public _addTruck(crane: number) {
-  //   let trucks = this.getTrucksArray(crane)
-  //   trucks.push(this._getTruckForm());
-  // }
+  public _addTruck(crane: number) {
+    this.getTrucksArray(crane).controls.push(this._getTruckForm());
+  }
 
   private _getTruckForm(): FormGroup {
     return new FormGroup({
@@ -92,29 +92,39 @@ export class AddFormComponent implements OnInit {
     this.event.emit({close: true});
   }
 
+  public onSelectTruck(crane: number, index: number, event: Event) {
+
+      if (!this.getTrucksArray(crane).controls[index].touched) {
+        this._addTruck(crane);
+      }
+      (<HTMLElement>event.target).blur();
+
+  }
+
   public onChange(crane: number, index: number) {
+    
     // setTimeout(() => {
     //   if (this.getTrucksArray(crane).controls[this.getTrucksArray(crane).controls.length - 1].touched) {
     //     this._addTruck(crane);
     //   }
     // })
-   
   }
 
   public calcTotalLoad() {
-    // let total = 0;
+    let total = 0;
 
-    // for (let crane of [1,2]) {
-    //   for (let control of this.getTrucksArray(crane).controls) {
-    //     total += +control.value.loaded;
-    //   }
-    // }
-    // this.totalLoad = total;
+    for (let crane of [1,2]) {
+      for (let control of this.getTrucksArray(crane).controls) {
+        total += +control.value.loaded;
+      }
+    }
+    this.totalLoad = total;
   }
 
   public removeTruck(crane: number, index: number) {
-    // this.getTrucksArray(crane).removeAt(index);
+    this.getTrucksArray(crane).removeAt(index);
   }
+
   public onSubmit() {
     
   }

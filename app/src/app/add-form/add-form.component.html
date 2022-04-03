@@ -37,8 +37,8 @@
                     <div>Выгружено, т</div>
                 </div>
                 <div *ngFor="let truck of getTrucksArray(1).controls; let idx = index">
-                    <div formArrayName="{{idx}}" class="grid" (change)="onChange(1, idx)">
-                        <select formControlName="truckName">
+                    <div formArrayName="{{idx}}" class="grid">
+                        <select formControlName="truckName" (input)="onSelectTruck(1, idx, $event)">
                             <option *ngFor="let tName of truckNames" value="{{tName}}">{{tName}}</option>
                         </select>
                         <input type="text" formControlName="loaded" >
@@ -52,8 +52,8 @@
             <div formArrayName="1" *ngIf="form.value.craneType === craneTypes.Double">
                 <div class="subheading">Второй кран</div>
                 <div *ngFor="let truck of getTrucksArray(2).controls; let idx = index">
-                    <div [formArrayName]="idx" class="grid" (change)="onChange(2, idx)">
-                        <select formControlName="truckName">
+                    <div [formArrayName]="idx" class="grid">
+                        <select formControlName="truckName" (change)="onSelectTruck(2, idx, $event)">
                             <option *ngFor="let truck of truckNames" value="{{truck}}">{{truck}}</option>
                         </select>
                         <input type="number" formControlName="loaded">
