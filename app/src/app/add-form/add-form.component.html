@@ -32,17 +32,18 @@
                 <div *ngIf="form.value.craneType === craneTypes.Double" class="subheading">Первый кран</div>
                 <div *ngIf="form.value.craneType !== craneTypes.Double" class="subheading">Кран</div>
                 <div class="grid">
-                    <div>Грузовик</div>
-                    <div>Погружено, т</div>
-                    <div>Выгружено, т</div>
+                    <div class="column-heading">Грузовик</div>
+                    <div class="column-heading">Погружено, т</div>
+                    <div class="column-heading">Выгружено, т</div>
                 </div>
                 <div *ngFor="let truck of getTrucksArray(1).controls; let idx = index">
                     <div formArrayName="{{idx}}" class="grid">
                         <select formControlName="truckName" (input)="onSelectTruck(1, idx, $event)">
+                            <option value="" disabled selected hidden>Выберите машину...</option>
                             <option *ngFor="let tName of truckNames" value="{{tName}}">{{tName}}</option>
                         </select>
-                        <input type="text" formControlName="loaded" >
-                        <input type="text" formControlName="unloaded">
+                        <input type="text" formControlName="loaded" (input)="disable(1, idx, true)">
+                        <input type="text" formControlName="unloaded" (input)="disable(1, idx, false)">
                         <button type="button" *ngIf="this.getTrucksArray(1).controls[idx].touched && getTrucksArray(1).length > 1" (click)="removeTruck(1, idx)">
                             <span class="material-icons">delete</span>
                         </button>
@@ -54,10 +55,11 @@
                 <div *ngFor="let truck of getTrucksArray(2).controls; let idx = index">
                     <div [formArrayName]="idx" class="grid">
                         <select formControlName="truckName" (change)="onSelectTruck(2, idx, $event)">
+                            <option value="" disabled selected hidden>Выберите машину...</option>
                             <option *ngFor="let truck of truckNames" value="{{truck}}">{{truck}}</option>
                         </select>
-                        <input type="number" formControlName="loaded">
-                        <input type="number" formControlName="unloaded">
+                        <input type="number" formControlName="loaded" (input)="disable(2, idx, true)">
+                        <input type="number" formControlName="unloaded" (input)="disable(2, idx, false)">
                         <button type="button" *ngIf="this.getTrucksArray(2).controls[idx].touched && getTrucksArray(2).length > 1" (click)="removeTruck(2, idx)">
                             <span class="material-icons">delete</span>
                         </button>
@@ -66,11 +68,15 @@
             </div>
         </div>
         <hr>
-        <div class="total">Всего погружено {{totalLoad}}т</div>
-        <div class="total">Всего выгружено т</div>
 
-        <button type="button" (click)="close()">Закрыть</button>
-        <button type="submit" class="accent-button" (click)="calcTotalLoad()">Сохранить</button>
+        <div class="total-container">
+            <div class="total">Всего погружено {{totalLoad}}т</div>
+            <div class="total">Всего выгружено т</div>
+        </div>
+        <div class="button-container">
+            <button type="button" class="primary-button" (click)="close()">Закрыть</button>
+            <button type="submit" class="accent-button">Сохранить</button>
+        </div>
     </form>
 </div>
 

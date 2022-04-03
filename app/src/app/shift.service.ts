@@ -39,8 +39,8 @@ export class ShiftService {
   private _shifts: Shift[] = [
     {id: 1, craneType: CraneType.Double, workerName: 'Иванов И.И.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: TruckName.Truck1, loaded: 10, unloaded: 0}] }, {trucks: [{name: TruckName.Truck2, loaded: 4, unloaded: 0}] }] },
     {id: 2, craneType: CraneType.Double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: TruckName.Truck2, loaded: 10, unloaded: 0}] }, {trucks: [{name: TruckName.Truck2, loaded: 4, unloaded: 0}] }]},
-    {id: 3, craneType: CraneType.Double, workerName: 'Сидоров С.С.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: TruckName.Truck1, loaded: 10, unloaded: 0}] }, {trucks: [{name: TruckName.Truck2, loaded: 4, unloaded: 0}] }]},
-    {id: 4, craneType: CraneType.Single, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: TruckName.Truck4, loaded: 10, unloaded: 0}] }]},
+    {id: 3, craneType: CraneType.Double, workerName: 'Сидоров С.С.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: TruckName.Truck1, loaded: 0, unloaded: 51}] }, {trucks: [{name: TruckName.Truck2, loaded: 4, unloaded: 0}] }]},
+    {id: 4, craneType: CraneType.Single, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: TruckName.Truck4, loaded: 0, unloaded: 100}] }]},
     {id: 5, craneType: CraneType.Single, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: TruckName.Truck1, loaded: 10, unloaded: 0}] }]},
   ]
 
@@ -49,15 +49,21 @@ export class ShiftService {
   }
 
   private _calcTotals() {
+
     for (let [index, shift] of this._shifts.entries() ) {
+
       let totalLoad = 0;
       let totalUnload = 0;
+      for (let crane of shift.cranes) {
 
-      for (let truck of shift.cranes[0].trucks) {
-        totalLoad += truck.loaded ? truck.loaded : 0;
-        totalUnload += truck.unloaded ? truck.unloaded : 0;
+        for (let truck of crane.trucks) {
+
+          totalLoad += truck.loaded ? truck.loaded : 0;
+          totalUnload += truck.unloaded ? truck.unloaded : 0;
+
+        }
       }
-      
+  
       this._shifts[index].totalLoad = totalLoad;
       this._shifts[index].totalUnload = totalUnload;
     }

@@ -29,14 +29,14 @@ export class AddFormComponent implements OnInit {
     }
 
     this.form = new FormGroup({
-      craneType: new FormControl(this.edit ? this.shift.craneType : '', [Validators.required]),
+      craneType: new FormControl({value: this.edit ? this.shift.craneType : '', disabled: this.edit}, [Validators.required]),
       workerName: new FormControl(this.edit ? this.shift.workerName : '', [Validators.required]),
       dateOfStart: new FormControl('', [Validators.required]),
       dateOfFinish: new FormControl('', [Validators.required]),
       cranes: this.createCranesArray()
     });
+
     console.log(this.form)
-    console.log(this.getTrucksArray(1));
   }
 
   private createCranesArray() {
@@ -93,8 +93,8 @@ export class AddFormComponent implements OnInit {
   }
 
   public onSelectTruck(crane: number, index: number, event: Event) {
-
-      if (!this.getTrucksArray(crane).controls[index].touched) {
+      let truckControl: FormControl = (<FormControl>this.getTrucksArray(crane).controls[index].get('truckName'));
+      if (!truckControl.touched) {
         this._addTruck(crane);
       }
       (<HTMLElement>event.target).blur();
@@ -110,7 +110,42 @@ export class AddFormComponent implements OnInit {
     // })
   }
 
-  public calcTotalLoad() {
+  public disable(crane: number, index: number, isLoaded: boolean) {
+
+    let controlLoad: FormControl = (<FormControl>this.getTrucksArray(crane).controls[index].get('loaded'));
+    let controlUnload: FormControl = (<FormControl>this.getTrucksArray(crane).controls[index].get('unloaded'));
+    
+    if (isLoaded) {
+      
+      if (!controlLoad.pristine && controlLoad.value !== '') {
+        controlUnload.disable();
+
+      } else {
+
+        controlUnload.enable();
+      }
+
+    } else {
+
+      if (!controlUnload.pristine && controlUnload.value !== '') {
+
+        controlLoad.disable();
+
+      } else {
+        
+        controlLoad.enable();
+      }
+
+    }
+    
+
+  }
+
+  private _calcTotals() {
+    this._calcTotalLoad();
+    this._calcTotalUnload();
+  }
+  private _calcTotalLoad() {
     let total = 0;
 
     for (let crane of [1,2]) {
@@ -119,6 +154,16 @@ export class AddFormComponent implements OnInit {
       }
     }
     this.totalLoad = total;
+  }
+  private _calcTotalUnload() {
+    let total = 0;
+
+    for (let crane of [1,2]) {
+      for (let control of this.getTrucksArray(crane).controls) {
+        total += +control.value.unloaded;
+      }
+    }
+    this.totalUnload = total;
   }
 
   public removeTruck(crane: number, index: number) {

@@ -1,8 +1,39 @@
 select, input {
     display: block;
 }
+.container{
+    padding: 2rem;
+}
+.heading {
+    display: grid;
+    grid-template-columns: 1fr 40px;
+}
 .grid {
     display: grid;
-    grid-template-columns: 3fr 2fr 2fr 20px;
+    grid-template-columns: 3fr 2fr 2fr 40px;
     grid-gap: 1rem;
+}
+.total-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+.total, .subheading {
+    font-weight: 600;
+}
+.column-heading {
+    text-align: center;
+}
+.date-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    & input {
+        display: inline;
+    }
+}
+.button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
 }
