@@ -1,7 +1,7 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 
-import { CraneType, TruckName } from '../shift.service';
+import { CraneType, TruckName, Shift } from '../shift.service';
 
 @Component({
   selector: 'app-add-form',
@@ -10,36 +10,75 @@ import { CraneType, TruckName } from '../shift.service';
 })
 export class AddFormComponent implements OnInit {
 
+  @Input('shift') shift: any = {};
   @Output() event: EventEmitter<any> = new EventEmitter;
 
   public form: FormGroup = new FormGroup({});
   public craneTypes = CraneType;
   public truckNames = Object.values(TruckName);
+  public edit = false;
+  public totalLoad: number = 0;
+  public totalUnload: number = 0;
 
   constructor() { }
 
   ngOnInit(): void {
 
-    this.form = new FormGroup({
-      craneType: new FormControl('', [Validators.required]),
-      workerName: new FormControl('', [Validators.required]),
-      trucks1: new FormArray([
-        this._getTruckForm()
-      ]),
-      trucks2: new FormArray([
-        this._getTruckForm()
-      ]),
-    });
+    if (Object.entries(this.shift).length !== 0) {
+      this.edit = true;
+    }
 
+    this.form = new FormGroup({
+      craneType: new FormControl(this.edit ? this.shift.craneType : '', [Validators.required]),
+      workerName: new FormControl(this.edit ? this.shift.workerName : '', [Validators.required]),
+      dateOfStart: new FormControl('', [Validators.required]),
+      dateOfFinish: new FormControl('', [Validators.required]),
+      cranes: this.createCranesArray()
+    });
+    console.log(this.form)
+    console.log(this.getTrucksArray(1).controls);
+  }
+
+  private createCranesArray() {
+    if (!this.edit) {
+      return new FormArray([
+        new FormArray([ this._getTruckForm() ])
+      ]);
+    }
+
+    if (this.shift.cranes.length === 1) {
+      return new FormArray([
+        this.createTruckFormArray(1)
+      ])
+    }
+
+    return new FormArray([
+      this.createTruckFormArray(1),
+      this.createTruckFormArray(2)
+    ])
+  }
+
+  private createTruckFormArray(crane: number): FormArray {
+    let res: FormArray = new FormArray([]);
+
+    for (let truck of this.shift.cranes[crane - 1].trucks) {
+      res.push( new FormGroup({
+        truckName: new FormControl(truck.name),
+        loaded: new FormControl(truck.loaded ? truck.loaded : ''),
+        unloaded: new FormControl(truck.unloaded ? truck.unloaded : ''),
+
+      }));
+    }
+    return res;
   }
 
   public getTrucksArray(crane: number): FormArray {
-    return this.form.get(`trucks${crane}`) as FormArray;
+    return (<FormArray>this.form.get('cranes')).controls[crane - 1] as FormArray;
   }  
-  public _addTruck(crane: number) {
-    let trucks = this.getTrucksArray(crane)
-    trucks.push(this._getTruckForm());
-  }
+  // public _addTruck(crane: number) {
+  //   let trucks = this.getTrucksArray(crane)
+  //   trucks.push(this._getTruckForm());
+  // }
 
   private _getTruckForm(): FormGroup {
     return new FormGroup({
@@ -54,16 +93,27 @@ export class AddFormComponent implements OnInit {
   }
 
   public onChange(crane: number, index: number) {
-    setTimeout(() => {
-      if (this.getTrucksArray(crane).controls[this.getTrucksArray(crane).controls.length - 1].touched) {
-        this._addTruck(crane);
-      }
-    })
+    // setTimeout(() => {
+    //   if (this.getTrucksArray(crane).controls[this.getTrucksArray(crane).controls.length - 1].touched) {
+    //     this._addTruck(crane);
+    //   }
+    // })
    
   }
 
+  public calcTotalLoad() {
+    // let total = 0;
+
+    // for (let crane of [1,2]) {
+    //   for (let control of this.getTrucksArray(crane).controls) {
+    //     total += +control.value.loaded;
+    //   }
+    // }
+    // this.totalLoad = total;
+  }
+
   public removeTruck(crane: number, index: number) {
-    this.getTrucksArray(crane).removeAt(index);
+    // this.getTrucksArray(crane).removeAt(index);
   }
   public onSubmit() {
     

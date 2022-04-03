@@ -16,6 +16,9 @@ export interface Truck {
   loaded?: number,
   unloaded?: number
 }
+export interface Crane {
+  trucks: Truck[]
+}
 
 export interface Shift {
   readonly id: number,
@@ -23,8 +26,7 @@ export interface Shift {
   workerName: string,
   dateOfStart: Date,
   dateOfFinish: Date,
-  firstCrane: Truck[],
-  secondCrane?: Truck[],
+  cranes: Crane[],
   totalLoad?: number,
   totalUnload?: number
 }
@@ -35,11 +37,11 @@ export interface Shift {
 export class ShiftService {
 
   private _shifts: Shift[] = [
-    {id: 1, craneType: CraneType.Double, workerName: 'Иванов И.И.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
-    {id: 2, craneType: CraneType.Double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
-    {id: 3, craneType: CraneType.Double, workerName: 'Сидоров С.С.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
-    {id: 4, craneType: CraneType.Double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
-    {id: 5, craneType: CraneType.Single, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), firstCrane: [{name: 'ygdsc', loaded: 10, unloaded: 0}]},
+    {id: 1, craneType: CraneType.Double, workerName: 'Иванов И.И.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: 'ygdsc', loaded: 10, unloaded: 0}] }, {trucks: [{name: 'dsfgv', loaded: 4, unloaded: 0}] }] },
+    {id: 2, craneType: CraneType.Double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: 'ygdsc', loaded: 10, unloaded: 0}] }]},
+    {id: 3, craneType: CraneType.Double, workerName: 'Сидоров С.С.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: 'ygdsc', loaded: 10, unloaded: 0}] }]},
+    {id: 4, craneType: CraneType.Double, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: 'ygdsc', loaded: 10, unloaded: 0}] }]},
+    {id: 5, craneType: CraneType.Single, workerName: 'Петров П.П.', dateOfStart: new Date('2020-12-24T08:00'), dateOfFinish: new Date('2020-12-24T19:00'), cranes: [{trucks: [{name: 'ygdsc', loaded: 10, unloaded: 0}] }]},
   ]
 
   constructor() { 
@@ -47,12 +49,11 @@ export class ShiftService {
   }
 
   private _calcTotals() {
-
     for (let [index, shift] of this._shifts.entries() ) {
       let totalLoad = 0;
       let totalUnload = 0;
 
-      for (let truck of shift.firstCrane) {
+      for (let truck of shift.cranes[0].trucks) {
         totalLoad += truck.loaded ? truck.loaded : 0;
         totalUnload += truck.unloaded ? truck.unloaded : 0;
       }
