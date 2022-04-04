@@ -10,7 +10,7 @@ import { AddFormComponent } from './add-form/add-form.component';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations'; 
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations'; 
 import { MatMomentDateModule }  from '@angular/material-moment-adapter';
 
 
@@ -26,11 +26,13 @@ import { MatMomentDateModule }  from '@angular/material-moment-adapter';
     ReactiveFormsModule,
     MatDatepickerModule,
     MatFormFieldModule,
-    NoopAnimationsModule,
+    BrowserAnimationsModule,
     MatMomentDateModule,
     MatInputModule
   ],
-  providers: [],
+  providers: [
+    MatDatepickerModule
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

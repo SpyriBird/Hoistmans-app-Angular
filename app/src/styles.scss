@@ -1,4 +1,4 @@
-@import '~@angular/material/prebuilt-themes/pink-bluegrey'; 
+@import '~@angular/material/prebuilt-themes/indigo-pink'; 
 :root {
     --accent-background-color: #b4da3b;
     --primary-background-color: #dfeeaf;
@@ -6,7 +6,7 @@
    
 
     --default-text-color: black;
-    --placeholdel-color: silver;
+    --placeholdel-color: #bbbbbb;
     --table-heading-color: white;
 
     --accent-button-color: blue;
@@ -41,3 +41,25 @@ button {
 }
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+::placeholder {
+    color: var(--placeholdel-color)
+}
+
+input, select {
+    padding: .5rem 1rem;
+    box-sizing: border-box;
+    height: 2rem;
+    border: 1px solid var(--primary-button-color);
+    border-radius: 4px;
+
+    &:enabled {
+        background-color: var(--default-background-color);
+    }
+    &:disabled {
+        background-color: var(--placeholdel-color);
+    }
+    &:focus {
+        outline: none;
+    }
+}

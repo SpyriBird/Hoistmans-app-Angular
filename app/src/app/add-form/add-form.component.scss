@@ -15,12 +15,20 @@ select, input {
 }
 .total-container {
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-end;
+    flex-direction: row;
+    justify-content: flex-end;
 }
+.total {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 1em;
+}
+
 .total, .subheading {
     font-weight: 600;
+}
+.name-input {
+    width: 100%;
 }
 .column-heading {
     text-align: center;
@@ -28,12 +36,16 @@ select, input {
 .date-inputs {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    // & input {
-    //     display: inline;
-    // }
+    & input {
+        display: inline;
+    }
 }
 .button-container {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+}
+.error-message {
+    color: red;
+    font-size: small;
 }
