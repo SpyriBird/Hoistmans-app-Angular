@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
 import { ShiftsComponent } from './shifts/shifts.component';
-import { AddFormComponent } from './add-form/add-form.component';
+import { ShiftFormComponent } from './shift-form/shift-form.component';
 
 
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -18,7 +18,7 @@ import { MatMomentDateModule }  from '@angular/material-moment-adapter';
   declarations: [
     AppComponent,
     ShiftsComponent,
-    AddFormComponent
+    ShiftFormComponent
   ],
   imports: [
     BrowserModule,

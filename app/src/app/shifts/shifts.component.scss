@@ -1,5 +1,8 @@
-
 @import '../../styles.scss';
+
+.table-container {
+    padding: 0 2rem;
+}
 h1 {
     text-align: center;
 }
@@ -9,26 +12,34 @@ h1 {
     border: 2px solid var(--default-text-color);
 }
 table {
+
     margin-top: 20px;
     border-collapse: collapse;
     width: 100%;
     box-shadow: 5px 5px var(--placeholdel-color);
-}
-th, td {
-    border: 1px solid var(--accent-background-color);
-}
-tr {
+    tr {
 
-    &:nth-of-type(odd) {
-        background-color: var(--primary-background-color);
+        &:nth-of-type(odd) {
+            background-color: var(--primary-background-color);
+        }
+        &:first-of-type {
+            background-color: var(--accent-background-color);
+        }
     }
-    &:first-of-type {
-        background-color: var(--accent-background-color);
+    th {
+        padding: .7rem 0;
+        color: var(--table-heading-color);
+        text-align: left;
+    }
+    th, td {
+        border: 1px solid var(--accent-background-color);
+    }
+    td {
+        padding: 0 .5rem;
     }
 }
-th {
-    color: var(--table-heading-color);
-    text-align: left;
+td.actions-column {
+    text-align: center;
 }
 
 .cover {
@@ -47,10 +58,5 @@ th {
     top: 150px;
     right: calc(50% - 400px);
     z-index: 3;
-}
-button:enabled {
-    cursor: pointer;
-}
-button span {
-    cursor: inherit;
+    border-radius: 8px;
 }

@@ -8,7 +8,7 @@ import { ShiftService, Shift, CraneType } from '../shift.service';
 })
 export class ShiftsComponent implements OnInit {
 
-  public adding = false;
+  public showModalWindow = false;
   public toModal: any = null;
   public shifts: Shift[] = []; 
 
@@ -18,14 +18,14 @@ export class ShiftsComponent implements OnInit {
       this.shifts = this.shiftService.getShifts();
   }
 
-  public addShift() {
+  public showAddingForm() {
     this.toModal = {};
-    this.adding = true;
+    this.showModalWindow = true;
   }
 
-  public editShift(id: number) {
+  public showEditingForm(id: number) {
     this.toModal = this._getShiftById(id);
-    this.adding = true;
+    this.showModalWindow = true;
   }
 
   private _getShiftById(id: number) {
@@ -33,11 +33,35 @@ export class ShiftsComponent implements OnInit {
   }
 
   public closeModalWindow() {
-    this.adding = false;
+    this.showModalWindow = false;
   }  
 
   public handleEvent(event: any) {
-    if (event?.close) this.adding = false;
+    if (event?.close) {
+      this.showModalWindow = false;
+      return;
+    }
+
+    if (event?.edit) {
+      this.showModalWindow = false;
+      this._editShift(event.edit);
+    }
+
+    if (event?.add) {
+  
+      this.showModalWindow = false;
+      this._addshift(event.add);
+    }
+
+  }
+
+  private _editShift(shift: any) {
+    this.shiftService.editShift(shift);
+  }
+
+  private _addshift(shift: any) {
+    this.shiftService.addShift(shift);
+    
   }
 
   public removeShift(id: number) {

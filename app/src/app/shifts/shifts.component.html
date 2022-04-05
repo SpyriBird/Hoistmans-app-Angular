@@ -1,33 +1,35 @@
 <div class="container">
     <div class="heading">
         <h1>Список смен</h1> 
-        <button type="button" (click)="addShift()" class="icon-button"><span class="material-icons">add</span></button>
+        <button type="button" (click)="showAddingForm()" class="icon-button"><span class="material-icons">add</span></button>
     </div>
-    <table>
-        <tr>
-            <th>ФИО</th>
-            <th>Начало</th>
-            <th>Окончание</th>
-            <th>Тип крана</th>
-            <th>Погружено тонн</th>
-            <th>Выгружено тонн</th>
-            <th>actions</th>
-        </tr>
-        <tr *ngFor="let shift of shifts">
-            <td>{{shift.workerName}}</td>
-            <td>{{shift.dateOfStart | date:'dd.MM.yy H:mm'}}</td>
-            <td>{{shift.dateOfFinish | date:'dd.MM.yy H:mm'}}</td>
-            <td>{{shift.craneType }}</td>
-            <td>{{shift.totalLoad ? shift.totalLoad + " т" : ''}}</td>
-            <td>{{shift.totalUnload ? shift.totalUnload + " т" : ''}}</td>
-            <td>
-                <button type="button" class="icon-button" (click)="editShift(shift.id)"><span class="material-icons">edit</span></button>
-                <button type="button" class="icon-button" (click)="removeShift(shift.id)"><span class="material-icons">delete</span></button>
-            </td>
-        </tr>
-    </table>
+    <div class="table-container">
+        <table>
+            <tr>
+                <th>ФИО</th>
+                <th>Начало</th>
+                <th>Окончание</th>
+                <th>Тип крана</th>
+                <th>Погружено, т</th>
+                <th>Выгружено, т</th>
+                <th class="actions-column"></th>
+            </tr>
+            <tr *ngFor="let shift of shifts">
+                <td>{{shift.workerName}}</td>
+                <td>{{shift.dateOfStart | date:'dd.MM.yy H:mm'}}</td>
+                <td>{{shift.dateOfFinish | date:'dd.MM.yy H:mm'}}</td>
+                <td>{{shift.craneType }}</td>
+                <td>{{shift.totalLoad ? shift.totalLoad : ''}}</td>
+                <td>{{shift.totalUnload ? shift.totalUnload : ''}}</td>
+                <td class="actions-column">
+                    <button type="button" class="icon-button" (click)="showEditingForm(shift.id)"><span class="material-icons">edit</span></button>
+                    <button type="button" class="icon-button" (click)="removeShift(shift.id)"><span class="material-icons">delete</span></button>
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
-<div *ngIf="adding">
+<div *ngIf="showModalWindow">
     <div class="cover" (click)="closeModalWindow()"></div>
-    <app-add-form [shift]="toModal" (event)="handleEvent($event)" class="modal-window"></app-add-form>
+    <app-shift-form [shift]="toModal" (event)="handleEvent($event)" class="modal-window"></app-shift-form>
 </div>

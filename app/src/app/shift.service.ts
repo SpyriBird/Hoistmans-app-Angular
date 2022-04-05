@@ -21,7 +21,7 @@ export interface Crane {
 }
 
 export interface Shift {
-  readonly id: number,
+  id: number,
   readonly craneType: CraneType,
   workerName: string,
   dateOfStart: Date,
@@ -58,8 +58,8 @@ export class ShiftService {
 
         for (let truck of crane.trucks) {
 
-          totalLoad += truck.loaded ? truck.loaded : 0;
-          totalUnload += truck.unloaded ? truck.unloaded : 0;
+          totalLoad += truck.loaded ? +truck.loaded : 0;
+          totalUnload += truck.unloaded ? +truck.unloaded : 0;
 
         }
       }
@@ -74,7 +74,16 @@ export class ShiftService {
   }
 
   public addShift(shift: Shift) {
+
+    shift.id = this._getNextId();
+
     this._shifts.push(shift);
+    this._calcTotals();
+  }
+
+  private _getNextId() {
+    let id = this._shifts[this._shifts.length - 1].id;
+    return id + 1;
   }
 
   public removeShift(id: number) {
@@ -82,9 +91,9 @@ export class ShiftService {
   }
 
   public editShift(shift: Shift) {
-
     let editedIndex = this._shifts.findIndex( (item) => item.id === shift.id);
     this._shifts[editedIndex] = shift;
+    this._calcTotals();
 
   }
 }

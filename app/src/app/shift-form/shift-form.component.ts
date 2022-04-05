@@ -1,5 +1,5 @@
 import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
-import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { CraneType, TruckName } from '../shift.service';
 
@@ -19,9 +19,9 @@ export const MY_FORMATS = {
 };
 
 @Component({
-  selector: 'app-add-form',
-  templateUrl: './add-form.component.html',
-  styleUrls: ['./add-form.component.scss'],
+  selector: 'app-shift-form',
+  templateUrl: './shift-form.component.html',
+  styleUrls: ['./shift-form.component.scss'],
   providers: [
     {
       provide: DateAdapter,
@@ -32,7 +32,7 @@ export const MY_FORMATS = {
     {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS},
   ],
 })
-export class AddFormComponent implements OnInit {
+export class ShiftFormComponent implements OnInit {
 
   @Input('shift') shift: any = {};
   @Output() event: EventEmitter<any> = new EventEmitter;
@@ -44,7 +44,7 @@ export class AddFormComponent implements OnInit {
   public edit = false;
   public totalLoad: number = 0;
   public totalUnload: number = 0;
-  public showErrors = false;
+  public showError = false;
   private newShift: any;
 
   constructor() { }
@@ -58,19 +58,19 @@ export class AddFormComponent implements OnInit {
 
     this.form = new FormGroup({
       craneType: new FormControl({value: this.edit ? this.shift.craneType : '', disabled: this.edit}, [Validators.required]),
-      workerName: new FormControl(this.edit ? this.shift.workerName : '', [Validators.required, ]),
-        // Validators.pattern('^[А-Я][а-я]+(-[А-Я][а-я]+)? [А-Я]\.[А-Я].\$')]),
+      workerName: new FormControl(this.edit ? this.shift.workerName : '', [Validators.required, Validators.pattern('^[А-Я][а-я]+(-[А-Я][а-я]+)? [А-Я]\.[А-Я].\$')]),
       dateOfStart: new FormControl(this.edit ? this.shift.dateOfStart : '', [Validators.required]),
       dateOfFinish: new FormControl(this.edit ? this.shift.dateOfFinish : '', [Validators.required]),
-      cranes: this.createCranesArray()
+      cranes: this._createCranesArray()
     });
-
 
     this._calcTotals();
     this._disableCargoInputs();
+
+    console.log(this.form)
   }
 
-  private createCranesArray() {
+  private _createCranesArray() {
     if (!this.edit) {
       return new FormArray([
         new FormArray([ this._getTruckForm() ]),
@@ -80,24 +80,24 @@ export class AddFormComponent implements OnInit {
 
     if (this.shift.cranes.length === 1) {
       return new FormArray([
-        this.createTruckFormArray(1)
+        this._createTruckFormArray(1)
       ])
     }
 
     return new FormArray([
-      this.createTruckFormArray(1),
-      this.createTruckFormArray(2)
+      this._createTruckFormArray(1),
+      this._createTruckFormArray(2)
     ])
   }
 
-  private createTruckFormArray(crane: number): FormArray {
+  private _createTruckFormArray(crane: number): FormArray {
     let res: FormArray = new FormArray([]);
 
     for (let truck of this.shift.cranes[crane - 1].trucks) {
       res.push( new FormGroup({
-        truckName: new FormControl(truck.name),
-        loaded: new FormControl(truck.loaded ? truck.loaded : ''),
-        unloaded: new FormControl(truck.unloaded ? truck.unloaded : ''),
+        name: new FormControl(truck.name),
+        loaded: new FormControl(truck.loaded ? truck.loaded : '', [this._validateCargos]),
+        unloaded: new FormControl(truck.unloaded ? truck.unloaded : '', [this._validateCargos]),
 
       }));
     }
@@ -119,9 +119,9 @@ export class AddFormComponent implements OnInit {
 
   private _getTruckForm(): FormGroup {
     return new FormGroup({
-        truckName: new FormControl(''),
-        loaded: new FormControl(''),
-        unloaded: new FormControl('')
+        name: new FormControl(''),
+        loaded: new FormControl('', [this._validateCargos]),
+        unloaded: new FormControl('', [this._validateCargos])
     });
   }
 
@@ -132,11 +132,11 @@ export class AddFormComponent implements OnInit {
   public onSelectTruck(crane: number, index: number, event: Event) {
 
       // if this truck is untouched but already has some initial value a new truck fields are not created
-      if (this.form.value.cranes[crane - 1][index].truckName) {
+      if (this.form.value.cranes[crane - 1][index]?.name) {
         return;
       }
 
-      let truckControl: FormControl = (<FormControl>this.getTrucksArray(crane).controls[index].get('truckName'));
+      let truckControl: FormControl = (<FormControl>this.getTrucksArray(crane).controls[index].get('name'));
       if (!truckControl.touched) {
         this._addTruck(crane);
       }
@@ -144,20 +144,36 @@ export class AddFormComponent implements OnInit {
 
   }
 
-  public onChange(crane: number, index: number) {
-    
+  private _validateCargos(control: AbstractControl) {
+    if (!control.value || String(control.value) === String(Number.parseFloat(control.value) )) {
+      return null;
+    }
+    console.log(control.value);
+    return {notNumber: true}
   }
+
+  public onChange(crane: number, index: number, targetControl: string) {
+
+    this._manageCargoStates(crane, index, targetControl);
+
+    let value = this.getTrucksArray(crane).controls[index].value[targetControl];
+   
+    if (value === String( Number.parseFloat(value) )) {
+
+      this._calcTotals()
+    } 
+  };
 
   private _getCargoControls(crane: number, index: number, targetControl: string): FormControl[] {
 
-    if (targetControl === 'load') {
+    if (targetControl === 'loaded') {
       return [
         (<FormControl>this.getTrucksArray(crane).controls[index].get('loaded')),
         (<FormControl>this.getTrucksArray(crane).controls[index].get('unloaded'))
       ];
     }
 
-    if (targetControl === 'unload') {
+    if (targetControl === 'unloaded') {
       return [
         (<FormControl>this.getTrucksArray(crane).controls[index].get('unloaded')),
         (<FormControl>this.getTrucksArray(crane).controls[index].get('loaded'))
@@ -165,15 +181,14 @@ export class AddFormComponent implements OnInit {
     }
 
     return [];
-
   }
 
-  public disable(crane: number, index: number, targetControl: string) {
+  private _manageCargoStates(crane: number, index: number, targetControl: string) {
 
     let controls: FormControl[] = this._getCargoControls(crane, index, targetControl);
-    
+    console.log(controls)
     if (!controls.length) return;
-
+    
     if (controls[0].value !== '') {
       controls[1].disable();
 
@@ -183,36 +198,25 @@ export class AddFormComponent implements OnInit {
   }
 
   private _calcTotals() {
-    this._calcTotalLoad();
-    this._calcTotalUnload();
+   this.totalLoad = this._calcTotal('loaded');
+   this.totalUnload = this._calcTotal('unloaded');
   }
 
-  private _calcTotalLoad() {
-
-    let total = 0;
-
-    for (let crane of this.getCranesArray() ) {
-      for (let control of this.getTrucksArray(+crane + 1).controls) {
-        total += +control.value.loaded;
-      }
-    }
-    this.totalLoad = total;
-  }
-
-  private _calcTotalUnload() {
+  private _calcTotal(controlName: string) {
 
     let total = 0;
     
     for (let crane of this.getCranesArray() ) {
       for (let control of this.getTrucksArray(+crane + 1).controls) {
-        total += +control.value.unloaded;
+        total += (<FormGroup>control).get(controlName)?.enabled ? +control.value[controlName] : 0;
       }
     }
-    this.totalUnload = total;
+    return total;
   }
 
   public removeTruck(crane: number, index: number) {
     this.getTrucksArray(crane).removeAt(index);
+    this._calcTotals();
   }
 
   private _disableCargoInputs() {
@@ -221,13 +225,12 @@ export class AddFormComponent implements OnInit {
       
       for (let truck of Object.keys(this.getTrucksArray(+crane + 1).controls)) {
 
-        for (let state of ['load', 'unload']) {
+        for (let state of ['loaded', 'unloaded']) {
 
-          this.disable(+crane + 1, +truck, state);
+          this._manageCargoStates(+crane + 1, +truck, state);
         }
       }
     }
-    
   }
 
   private _checkTrucks(crane: number): Boolean {
@@ -245,8 +248,8 @@ export class AddFormComponent implements OnInit {
         }
       }
 
-      if (count === 2 && truck.value.truckName) {
-        this.newShift.cranes[crane].push(truck.value);
+      if (count === 2 && truck.value.name) {
+        this.newShift.cranes[crane].trucks.push(truck.value);
       } else {
         isValid = !count ? isValid : false;
       }
@@ -260,7 +263,7 @@ export class AddFormComponent implements OnInit {
     let isValid = true;
 
     for (let crane of this.newShift.craneType === CraneType.Single ? [0] : this.getCranesArray()) {
-      if (!this._checkTrucks(+crane) || !this.newShift.cranes[crane].length) {
+      if (!this._checkTrucks(+crane) || !this.newShift.cranes[crane].trucks.length) {
         isValid = false;
       }
     }
@@ -270,21 +273,29 @@ export class AddFormComponent implements OnInit {
   public onSubmit() {
 
     this.newShift = {
+      id: this.edit ? this.shift.id : 0,
       craneType: this.form.value.craneType ?? this.shift.craneType,
       workerName: this.form.value.workerName,
       dateOfStart: this.form.value.dateOfStart,
       dateOfFinish: this.form.value.dateOfFinish,
-      cranes: [[], []]
+      cranes: [
+        {trucks: []},
+        {trucks: []}
+      ]
     }
+    this.showError = false;
+    if (this.form.valid && this._checkCranes()) {
+      
 
-    if (this.form.valid) {
-      console.log('valid')
-      console.log(this._checkCranes())
-
+      if (this.edit) {
+        this.event.emit({edit: this.newShift});
+      } else {
+        this.event.emit({add: this.newShift});
+      }
+    
     } else {
-      this.showErrors = true;
+      setTimeout(() => this.showError = true, 100);
     }
-    console.log('submit', this.newShift, this.form)
   }
 
 }

@@ -1,0 +1,121 @@
+<div class="container">
+
+    <div class="form__heading">
+        <h3>Добавление смены</h3>
+        <button type="button" class="icon-button" (click)="close()"><span class="material-icons">clear</span></button>
+    </div>
+
+    <hr>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form__group">
+            <label>
+                Тип крана
+                <select formControlName="craneType">
+                    <option value="" disabled selected hidden>Выберите тип крана...</option>
+                    <option value="{{craneTypes.Single}}">{{craneTypes.Single}}</option>
+                    <option value="{{craneTypes.Double}}">{{craneTypes.Double}}</option>
+                </select>
+                <div class="error-message" *ngIf="form.get('craneType')?.touched && form.get('craneType')?.errors?.['required']">Выберите тип крана</div>
+            </label>
+        </div>
+        <div class="form__group">
+            <label>
+                ФИО ответственного
+                <input class="form__name-input" type="text" placeholder="Иванов И.И." formControlName="workerName">
+                <span class="error-message" *ngIf="form.get('workerName')?.touched && form.get('workerName')?.errors?.['required']">Имя не введено. </span>
+                <span class="error-message" *ngIf="form.get('workerName')?.touched && form.get('workerName')?.errors?.['pattern'] ">Введите имя в формате Фамилия И.О.</span>
+            </label>
+        </div>
+        <div class="form__group form__group_date">
+            <label>
+                Дата начала
+                <input type="text" [matDatepicker]="dp1" formControlName="dateOfStart" placeholder="Выберите дату">
+                <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
+                <mat-datepicker #dp1></mat-datepicker>
+                <div class="error-message" *ngIf="form.get('dateOfStart')?.touched && form.get('dateOfStart')?.errors?.['required'] ">Дата начала не введена</div>
+            </label>
+            
+            <label>
+                Дата окончания
+                <input type="text" [matDatepicker]="dp2" formControlName="dateOfFinish" placeholder="Выберите дату">
+                <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
+                <mat-datepicker #dp2></mat-datepicker>
+                <div class="error-message" *ngIf="form.get('dateOfFinish')?.touched && form.get('dateOfFinish')?.errors?.['required'] ">Дата окончания не введена</div>
+            </label>
+        </div>
+        
+        <div formArrayName="cranes" class="form__group">
+
+            <div formArrayName="0">
+
+                <div *ngIf="form.value.craneType === craneTypes.Double || craneType === craneTypes.Double" class="subheading">Первый кран</div>
+                <div *ngIf="!(form.value.craneType === craneTypes.Double || craneType === craneTypes.Double)" class="subheading">Кран</div>
+                <div class="form__crane-container">
+                    <div class="form__truck-grid">
+                        <div class="form__column-heading">Грузовик</div>
+                        <div class="form__column-heading">Погружено, т</div>
+                        <div class="form__column-heading">Выгружено, т</div>
+                    </div>
+
+                    <div *ngFor="let truck of getTrucksArray(1).controls; let idx = index">
+                        <div formArrayName="{{idx}}" class="form__truck-grid">
+                            <select formControlName="name" (input)="onSelectTruck(1, idx, $event)">
+                                <option value="" disabled selected hidden>Выберите машину...</option>
+                                <option *ngFor="let tName of truckNames" value="{{tName}}">{{tName}}</option>
+                            </select>
+                            <input type="text" formControlName="loaded" (input)="onChange(1, idx, 'loaded')" [ngClass]="{error: getTrucksArray(1).controls[idx].get('loaded')?.errors}">
+                            <input type="text" formControlName="unloaded" (input)="onChange(1, idx, 'unloaded')" [ngClass]="{error: getTrucksArray(1).controls[idx].get('unloaded')?.errors}">
+                            <button type="button" *ngIf="(getTrucksArray(1).controls[idx].touched && getTrucksArray(1).length > 1) || getTrucksArray(1).controls[idx].value.name !== '' " (click)="removeTruck(1, idx)">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div formArrayName="1" *ngIf="form.value.craneType === craneTypes.Double || craneType === craneTypes.Double">
+
+                <div class="subheading">Второй кран</div>
+               
+                <div class="form__crane-container" *ngFor="let truck of getTrucksArray(2).controls; let idx = index">
+                    <div [formArrayName]="idx" class="form__truck-grid">
+                        <select formControlName="name" (input)="onSelectTruck(2, idx, $event)">
+                            <option value="" disabled selected hidden>Выберите машину...</option>
+                            <option *ngFor="let truck of truckNames" value="{{truck}}">{{truck}}</option>
+                        </select>
+                        <input type="text" formControlName="loaded" (input)="onChange(2, idx, 'loaded')" [ngClass]="{error: getTrucksArray(2).controls[idx].get('loaded')?.errors}">
+                        <input type="text" formControlName="unloaded" (input)="onChange(2, idx, 'unloaded')" [ngClass]="{error: getTrucksArray(2).controls[idx].get('unloaded')?.errors}">
+                        <button type="button" *ngIf="(getTrucksArray(2).controls[idx].touched && getTrucksArray(2).length > 1) || getTrucksArray(2).controls[idx].value.name !== '' " (click)="removeTruck(2, idx)">
+                            <span class="material-icons">delete</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <hr>
+
+        <div class="total-container form__group">
+            <div class="total">
+            <div>Всего погружено</div>
+            <div>{{totalLoad}} т</div>
+            <div>Всего выгружено</div>
+            <div>{{totalUnload}} т</div>
+        </div>
+        </div>
+
+        <div class="button-container">
+            <div class="error-message" *ngIf="showError">Не все поля заполнены верно</div>
+            <button type="button" class="primary-button" (click)="close()">Закрыть</button>
+            <button type="submit" class="accent-button">Сохранить</button>
+        </div>
+       
+
+    </form>
+</div>
+

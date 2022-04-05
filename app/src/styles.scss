@@ -3,7 +3,6 @@
     --accent-background-color: #b4da3b;
     --primary-background-color: #dfeeaf;
     --default-background-color: white;
-   
 
     --default-text-color: black;
     --placeholdel-color: #bbbbbb;
@@ -27,8 +26,8 @@ button {
 
 .icon-button {
     background-color: transparent;
-
 }
+
 .accent-button {
     background-color: var(--accent-button-color);
     padding: .5em 1em;
@@ -42,11 +41,14 @@ button {
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
-::placeholder {
+::placeholder, select.ng-untouched {
     color: var(--placeholdel-color)
 }
-
+option, select:focus, select:disabled {
+    color: var(--default-text-color)
+}
 input, select {
+    display: block;
     padding: .5rem 1rem;
     box-sizing: border-box;
     height: 2rem;
@@ -62,4 +64,16 @@ input, select {
     &:focus {
         outline: none;
     }
+}
+
+button:enabled {
+    cursor: pointer;
+}
+button span {
+    cursor: inherit;
+}        
+
+.error-message {
+    color: red;
+    font-size: small;
 }
