@@ -11,7 +11,7 @@
         <div class="form__group">
             <label>
                 Тип крана
-                <select formControlName="craneType">
+                <select formControlName="craneType" class="form__crane-input">
                     <option value="" disabled selected hidden>Выберите тип крана...</option>
                     <option value="{{craneTypes.Single}}">{{craneTypes.Single}}</option>
                     <option value="{{craneTypes.Double}}">{{craneTypes.Double}}</option>
@@ -66,7 +66,7 @@
                             </select>
                             <input type="text" formControlName="loaded" (input)="onChange(1, idx, 'loaded')" [ngClass]="{error: getTrucksArray(1).controls[idx].get('loaded')?.errors}">
                             <input type="text" formControlName="unloaded" (input)="onChange(1, idx, 'unloaded')" [ngClass]="{error: getTrucksArray(1).controls[idx].get('unloaded')?.errors}">
-                            <button type="button" *ngIf="(getTrucksArray(1).controls[idx].touched && getTrucksArray(1).length > 1) || getTrucksArray(1).controls[idx].value.name !== '' " (click)="removeTruck(1, idx)">
+                            <button type="button" *ngIf="showDeleteButton(1, idx)" (click)="removeTruck(1, idx)">
                                 <span class="material-icons">delete</span>
                             </button>
                         </div>
@@ -88,7 +88,7 @@
                         </select>
                         <input type="text" formControlName="loaded" (input)="onChange(2, idx, 'loaded')" [ngClass]="{error: getTrucksArray(2).controls[idx].get('loaded')?.errors}">
                         <input type="text" formControlName="unloaded" (input)="onChange(2, idx, 'unloaded')" [ngClass]="{error: getTrucksArray(2).controls[idx].get('unloaded')?.errors}">
-                        <button type="button" *ngIf="(getTrucksArray(2).controls[idx].touched && getTrucksArray(2).length > 1) || getTrucksArray(2).controls[idx].value.name !== '' " (click)="removeTruck(2, idx)">
+                        <button type="button" *ngIf="showDeleteButton(2, idx)" (click)="removeTruck(2, idx)">
                             <span class="material-icons">delete</span>
                         </button>
                     </div>
@@ -103,9 +103,9 @@
         <div class="total-container form__group">
             <div class="total">
             <div>Всего погружено</div>
-            <div>{{totalLoad}} т</div>
+            <div>{{calcTotal('loaded')}} т</div>
             <div>Всего выгружено</div>
-            <div>{{totalUnload}} т</div>
+            <div>{{calcTotal('unloaded')}} т</div>
         </div>
         </div>
 

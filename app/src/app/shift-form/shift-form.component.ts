@@ -3,10 +3,16 @@ import { AbstractControl, FormArray, FormControl, FormGroup, Validators } from '
 
 import { CraneType, TruckName } from '../shift.service';
 
-import {MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS} from '@angular/material-moment-adapter';
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
+import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 
-export const MY_FORMATS = {
+enum Status {
+  Edit,
+  Add
+}
+
+// a config for angular material datepicker 
+const MY_FORMATS = {
   parse: {
     dateInput: 'DD.MM.YYYY',
   },
@@ -32,18 +38,24 @@ export const MY_FORMATS = {
     {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS},
   ],
 })
+
 export class ShiftFormComponent implements OnInit {
 
   @Input('shift') shift: any = {};
   @Output() event: EventEmitter<any> = new EventEmitter;
 
   public form: FormGroup = new FormGroup({});
+
+  //for CraneType enum to be available in html
   public craneTypes = CraneType;
+
+  //current craneType
   public craneType: CraneType = CraneType.Single;
+
+  //for TruckNames enum to be available in html
   public truckNames = Object.values(TruckName);
-  public edit = false;
-  public totalLoad: number = 0;
-  public totalUnload: number = 0;
+
+  public status: Status = Status.Add;
   public showError = false;
   private newShift: any;
 
@@ -51,45 +63,166 @@ export class ShiftFormComponent implements OnInit {
 
   ngOnInit(): void {
 
+
+    // assigning the status
     if (Object.entries(this.shift).length !== 0) {
-      this.edit = true;
+      this.status = Status.Edit;
       this.craneType = this.shift.craneType;
     }
 
+    // creating the FormGroup 
     this.form = new FormGroup({
-      craneType: new FormControl({value: this.edit ? this.shift.craneType : '', disabled: this.edit}, [Validators.required]),
-      workerName: new FormControl(this.edit ? this.shift.workerName : '', [Validators.required, Validators.pattern('^[А-Я][а-я]+(-[А-Я][а-я]+)? [А-Я]\.[А-Я].\$')]),
-      dateOfStart: new FormControl(this.edit ? this.shift.dateOfStart : '', [Validators.required]),
-      dateOfFinish: new FormControl(this.edit ? this.shift.dateOfFinish : '', [Validators.required]),
+      craneType: new FormControl({value: this.status === Status.Edit ? this.shift.craneType : '', disabled: this.status === Status.Edit}, [Validators.required]),
+      workerName: new FormControl(this.status === Status.Edit ? this.shift.workerName : '', [Validators.required, Validators.pattern('^[А-Я][а-я]+(-[А-Я][а-я]+)? [А-Я]\.[А-Я].\$')]),
+      dateOfStart: new FormControl(this.status === Status.Edit ? this.shift.dateOfStart : '', [Validators.required]),
+      dateOfFinish: new FormControl(this.status === Status.Edit ? this.shift.dateOfFinish : '', [Validators.required]),
       cranes: this._createCranesArray()
     });
 
-    this._calcTotals();
+    // disableing load/unload inputs according to their values
     this._disableCargoInputs();
+  }
+  
 
-    console.log(this.form)
+  // validates form.value. emits an event or shows error message according to the result
+  public onSubmit(): void {
+
+    let invalid = false;
+
+    this.showError = false;
+
+    if (this.form.valid) {
+
+      this.newShift = {
+        cranes: [
+          {trucks: []},
+          {trucks: []}
+        ],
+        id: this.status === Status.Edit ? this.shift.id : 0,
+        craneType: this.form.value.craneType ?? this.shift.craneType,
+        workerName: this.form.value.workerName,
+        dateOfStart: this.status === Status.Edit ? this.form.value.dateOfStart : this.form.value.dateOfStart.set({hours: 8}),
+        dateOfFinish: this.status === Status.Edit ? this.form.value.dateOfFinish : this.form.value.dateOfFinish.set({hours:19}),
+      };
+
+      if (this._checkCranes()) {
+
+        if (this.status === Status.Edit) {
+          this.event.emit({edit: this.newShift});
+        } else {
+          this.event.emit({add: this.newShift});
+        }
+      
+      } else {
+        invalid = true;
+      }
+      
+    } else {
+      invalid = true;
+    }
+
+    if (invalid) {
+      setTimeout(() => this.showError = true, 100);
+    }
+  
+    
+  }
+  
+  public getTrucksArray(crane: number): FormArray {
+    return (<FormArray>this.form.get('cranes')).controls[crane - 1] as FormArray;
+  }  
+
+  public getCraneNamesArray(): string[] {
+    return  Object.keys( (<FormArray>this.form.get('cranes')).controls );
   }
 
-  private _createCranesArray() {
-    if (!this.edit) {
+  public _addTruck(crane: number): void {
+    this.getTrucksArray(crane).controls.push(this._getEmptyTruckFormGroup());
+  }
+
+  public close(): void {
+    this.event.emit({close: true});
+  }
+
+  public onSelectTruck(crane: number, index: number, event: Event): void {
+
+      // if this truck is untouched but already has some initial value a new truck fields are not created
+      if (this.form.value.cranes[crane - 1][index]?.name) {
+        return;
+      }
+
+      let truckControl: FormControl = (<FormControl>this.getTrucksArray(crane).controls[index].get('name'));
+      if (truckControl.pristine) {
+        this._addTruck(crane);
+      }
+      (<HTMLElement>event.target).blur();
+
+  }
+  public showDeleteButton(crane: number, truck: number): Boolean {
+    let lastTruck = this.getTrucksArray(crane).controls.length - 1;
+    return truck !== lastTruck;
+  }
+
+  public onChange(crane: number, index: number, targetControl: string): void {
+    this._manageCargoStates(crane, index, targetControl);
+  };
+
+  // calculates the sum of all load/unload (specified in the controlName argument) inputs
+  public calcTotal(controlName: string): string {
+
+    let total = 0;
+    
+    for (let crane of this.getCraneNamesArray() ) {
+      for (let control of this.getTrucksArray(+crane + 1).controls) {
+        let value = (<FormGroup>control).get(controlName)?.enabled ? control.value[controlName] : '0';
+        if (value && String(value) === String( Number.parseFloat(value)) && value > 0) {
+          total += +value;
+        } 
+      }
+    }
+    return total.toFixed(2);
+  }
+
+  // removes a truck
+  public removeTruck(crane: number, truck: number): void {
+    this.getTrucksArray(crane).removeAt(truck);
+  }
+
+  // returns a FormArray according to the requiring number of cranes and trucks
+  private _createCranesArray(): FormArray {
+
+    // default - 1 crane, 1 truck
+    if (this.status === Status.Add) {
       return new FormArray([
-        new FormArray([ this._getTruckForm() ]),
-        new FormArray([ this._getTruckForm() ])
+        new FormArray([ this._getEmptyTruckFormGroup() ]),
+        new FormArray([ this._getEmptyTruckFormGroup() ])
       ]);
     }
 
+    // 1 crane and as many trucks as there are + 1
     if (this.shift.cranes.length === 1) {
       return new FormArray([
         this._createTruckFormArray(1)
       ])
     }
 
+    // 2 crane and as many trucks as there are + 1
     return new FormArray([
       this._createTruckFormArray(1),
       this._createTruckFormArray(2)
     ])
   }
 
+  // privides a default truck FormGroup
+  private _getEmptyTruckFormGroup(): FormGroup {
+    return new FormGroup({
+        name: new FormControl(''),
+        loaded: new FormControl('', [this._validateCargos]),
+        unloaded: new FormControl('', [this._validateCargos])
+    });
+  }
+
+  // returns a trucks FormArray according to the trucks data in this.shift
   private _createTruckFormArray(crane: number): FormArray {
     let res: FormArray = new FormArray([]);
 
@@ -101,127 +234,16 @@ export class ShiftFormComponent implements OnInit {
 
       }));
     }
-    res.push( this._getTruckForm())
+
+    res.push( this._getEmptyTruckFormGroup())
     return res;
   }
 
-  public getTrucksArray(crane: number): FormArray {
-    return (<FormArray>this.form.get('cranes')).controls[crane - 1] as FormArray;
-  }  
 
-  public getCranesArray() {
-    return  Object.keys( (<FormArray>this.form.get('cranes')).controls );
-  }
+  // checks all the truck FormGroups and disables the needed inputs
+  private _disableCargoInputs(): void {
 
-  public _addTruck(crane: number) {
-    this.getTrucksArray(crane).controls.push(this._getTruckForm());
-  }
-
-  private _getTruckForm(): FormGroup {
-    return new FormGroup({
-        name: new FormControl(''),
-        loaded: new FormControl('', [this._validateCargos]),
-        unloaded: new FormControl('', [this._validateCargos])
-    });
-  }
-
-  public close() {
-    this.event.emit({close: true});
-  }
-
-  public onSelectTruck(crane: number, index: number, event: Event) {
-
-      // if this truck is untouched but already has some initial value a new truck fields are not created
-      if (this.form.value.cranes[crane - 1][index]?.name) {
-        return;
-      }
-
-      let truckControl: FormControl = (<FormControl>this.getTrucksArray(crane).controls[index].get('name'));
-      if (!truckControl.touched) {
-        this._addTruck(crane);
-      }
-      (<HTMLElement>event.target).blur();
-
-  }
-
-  private _validateCargos(control: AbstractControl) {
-    if (!control.value || String(control.value) === String(Number.parseFloat(control.value) )) {
-      return null;
-    }
-    console.log(control.value);
-    return {notNumber: true}
-  }
-
-  public onChange(crane: number, index: number, targetControl: string) {
-
-    this._manageCargoStates(crane, index, targetControl);
-
-    let value = this.getTrucksArray(crane).controls[index].value[targetControl];
-   
-    if (value === String( Number.parseFloat(value) )) {
-
-      this._calcTotals()
-    } 
-  };
-
-  private _getCargoControls(crane: number, index: number, targetControl: string): FormControl[] {
-
-    if (targetControl === 'loaded') {
-      return [
-        (<FormControl>this.getTrucksArray(crane).controls[index].get('loaded')),
-        (<FormControl>this.getTrucksArray(crane).controls[index].get('unloaded'))
-      ];
-    }
-
-    if (targetControl === 'unloaded') {
-      return [
-        (<FormControl>this.getTrucksArray(crane).controls[index].get('unloaded')),
-        (<FormControl>this.getTrucksArray(crane).controls[index].get('loaded'))
-      ];
-    }
-
-    return [];
-  }
-
-  private _manageCargoStates(crane: number, index: number, targetControl: string) {
-
-    let controls: FormControl[] = this._getCargoControls(crane, index, targetControl);
-    console.log(controls)
-    if (!controls.length) return;
-    
-    if (controls[0].value !== '') {
-      controls[1].disable();
-
-    } else {
-      controls[1].enable();
-    }
-  }
-
-  private _calcTotals() {
-   this.totalLoad = this._calcTotal('loaded');
-   this.totalUnload = this._calcTotal('unloaded');
-  }
-
-  private _calcTotal(controlName: string) {
-
-    let total = 0;
-    
-    for (let crane of this.getCranesArray() ) {
-      for (let control of this.getTrucksArray(+crane + 1).controls) {
-        total += (<FormGroup>control).get(controlName)?.enabled ? +control.value[controlName] : 0;
-      }
-    }
-    return total;
-  }
-
-  public removeTruck(crane: number, index: number) {
-    this.getTrucksArray(crane).removeAt(index);
-    this._calcTotals();
-  }
-
-  private _disableCargoInputs() {
-
-    for (let crane of this.getCranesArray()) {
+    for (let crane of this.getCraneNamesArray()) {
       
       for (let truck of Object.keys(this.getTrucksArray(+crane + 1).controls)) {
 
@@ -233,6 +255,54 @@ export class ShiftFormComponent implements OnInit {
     }
   }
 
+  //disables a truck cargo input if its neighbor has some value
+  private _manageCargoStates(crane: number, truck: number, targetControl: string): void {
+
+    let controls: FormControl[] = this._getCargoControls(crane, truck, targetControl);
+    if (!controls.length) return;
+    
+    if (controls[0].value !== '') {
+      controls[1].disable();
+
+    } else {
+      controls[1].enable();
+    }
+  }
+
+  // returns a pair of truck cargo input controls
+  private _getCargoControls(crane: number, truck: number, targetControl: string): FormControl[] {
+
+    if (targetControl === 'loaded') {
+      return [
+        (<FormControl>this.getTrucksArray(crane).controls[truck].get('loaded')),
+        (<FormControl>this.getTrucksArray(crane).controls[truck].get('unloaded'))
+      ];
+    }
+
+    if (targetControl === 'unloaded') {
+      return [
+        (<FormControl>this.getTrucksArray(crane).controls[truck].get('unloaded')),
+        (<FormControl>this.getTrucksArray(crane).controls[truck].get('loaded'))
+      ];
+    }
+
+    return [];
+  }
+
+  // checks that each truck has valid values and there is at least one filled truck per crane
+  private _checkCranes(): Boolean {
+    let isValid = true;
+
+    for (let crane of this.newShift.craneType === CraneType.Single ? [0] : this.getCraneNamesArray()) {
+      if (!this._checkTrucks(+crane) || !this.newShift.cranes[crane].trucks.length) {
+        isValid = false;
+      }
+    }
+    return isValid;
+  }
+
+  // checks all the trucks in a crane. valid = has truckName + has load/unload || is empty
+  // pushes valid trucks to this.newShift.cranes[crane].trucks
   private _checkTrucks(crane: number): Boolean {
 
     let isValid = true;
@@ -259,43 +329,12 @@ export class ShiftFormComponent implements OnInit {
     return isValid;
   }
 
-  private _checkCranes(): Boolean {
-    let isValid = true;
-
-    for (let crane of this.newShift.craneType === CraneType.Single ? [0] : this.getCranesArray()) {
-      if (!this._checkTrucks(+crane) || !this.newShift.cranes[crane].trucks.length) {
-        isValid = false;
-      }
+  // validator for load/unload inputs
+  // valid = '' || positive number
+  private _validateCargos(control: AbstractControl): null | {} {
+    if (!control.value || (String(control.value) === String( Number.parseFloat(control.value) ) && control.value > 0)) {
+      return null;
     }
-    return isValid;
+    return {notNumber: true}
   }
-
-  public onSubmit() {
-
-    this.newShift = {
-      id: this.edit ? this.shift.id : 0,
-      craneType: this.form.value.craneType ?? this.shift.craneType,
-      workerName: this.form.value.workerName,
-      dateOfStart: this.form.value.dateOfStart,
-      dateOfFinish: this.form.value.dateOfFinish,
-      cranes: [
-        {trucks: []},
-        {trucks: []}
-      ]
-    }
-    this.showError = false;
-    if (this.form.valid && this._checkCranes()) {
-      
-
-      if (this.edit) {
-        this.event.emit({edit: this.newShift});
-      } else {
-        this.event.emit({add: this.newShift});
-      }
-    
-    } else {
-      setTimeout(() => this.showError = true, 100);
-    }
-  }
-
 }

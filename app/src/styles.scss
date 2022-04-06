@@ -41,7 +41,7 @@ button {
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
-::placeholder, select.ng-untouched {
+::placeholder {
     color: var(--placeholdel-color)
 }
 option, select:focus, select:disabled {

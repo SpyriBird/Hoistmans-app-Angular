@@ -9,7 +9,7 @@ import { ShiftService, Shift, CraneType } from '../shift.service';
 export class ShiftsComponent implements OnInit {
 
   public showModalWindow = false;
-  public toModal: any = null;
+  public toModal: Shift | {} = {};
   public shifts: Shift[] = []; 
 
   constructor(private shiftService: ShiftService) {}
@@ -18,56 +18,58 @@ export class ShiftsComponent implements OnInit {
       this.shifts = this.shiftService.getShifts();
   }
 
-  public showAddingForm() {
+  public showAddingForm(): void {
     this.toModal = {};
     this.showModalWindow = true;
   }
 
-  public showEditingForm(id: number) {
+  public showEditingForm(id: number): void {
     this.toModal = this._getShiftById(id);
     this.showModalWindow = true;
   }
 
-  private _getShiftById(id: number) {
-    return this.shifts.find((item) => item.id === id);
-  }
-
-  public closeModalWindow() {
+  public closeModalWindow(): void {
     this.showModalWindow = false;
   }  
 
-  public handleEvent(event: any) {
-    if (event?.close) {
-      this.showModalWindow = false;
-      return;
-    }
+  public handleEvent(event: any): void {
+
+    this.closeModalWindow();
 
     if (event?.edit) {
-      this.showModalWindow = false;
+
       this._editShift(event.edit);
+      return;
     }
 
     if (event?.add) {
   
-      this.showModalWindow = false;
       this._addshift(event.add);
+      return;
     }
 
   }
 
-  private _editShift(shift: any) {
-    this.shiftService.editShift(shift);
-  }
-
-  private _addshift(shift: any) {
-    this.shiftService.addShift(shift);
-    
-  }
-
-  public removeShift(id: number) {
-    
+  public removeShift(id: number): void {
     this.shiftService.removeShift(id);
     this.shifts = this.shiftService.getShifts();  
   }
 
+
+
+  private _getShiftById(id: number): Shift | {} {
+
+    let shift = this.shifts.find((item) => item.id === id);
+    if (shift) return shift;
+
+    return {};
+  }
+
+  private _editShift(shift: any): void {
+    this.shiftService.editShift(shift);
+  }
+
+  private _addshift(shift: any): void {
+    this.shiftService.addShift(shift);
+  }
 }
